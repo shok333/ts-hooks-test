@@ -1,25 +1,32 @@
 import React from 'react';
-import logo from './logo.svg';
+import { BrowserRouter, Route, NavLink } from 'react-router-dom';
+import { Provider } from 'react-redux';
 import './App.css';
+import store from './store';
+import Index from './Components/Index/index';
+import Post from './Components/Post';
+// import TS from './Components/TS/index';
+// import Alg from './Components/Alg';
+import 'antd/dist/antd.css';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Provider store={store}>
+      <BrowserRouter>
+        <nav className="navigation">
+          <ul>
+            <li><NavLink to="/">Главная</NavLink></li>
+            {/* <li><NavLink to="/ts">TS</NavLink></li> */}
+            <li><NavLink to="/post">Пост</NavLink></li>
+            {/* <li><NavLink to="/alg">Alg</NavLink></li> */}
+          </ul>
+        </nav>
+        <Route exact={true} path="/post" component={Post}/>
+        {/* <Route exact={true} path="/ts" component={TS}/> */}
+        {/* <Route exact={true} path="/alg" component={Alg}/> */}
+        <Route exact={true} path="/" component={Index}/>
+      </BrowserRouter>
+    </Provider>
   );
 }
 
