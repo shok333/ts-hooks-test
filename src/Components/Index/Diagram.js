@@ -2,7 +2,8 @@ import React, {useEffect, useRef} from 'react';
 import * as d3 from "d3";
 import PropTypes from 'prop-types';
 
-const firstGroupWidth = 22;
+const firstGroupWidth = 20;
+const firstGroupMargin = 2
 const diagramHeight = 400;
 // const secondGroupLeftMargin = 5;
 
@@ -23,12 +24,12 @@ export default function Diagram ({posts}) {
         index * 50
       ))
       .attr('x', (object, index) => {
-        const x = index * firstGroupWidth;
+        const x = index * (firstGroupWidth + firstGroupMargin);
 
         if (!isReverse.current) {
-          return `${svgWidth - firstGroupWidth - x}px`;
+          return svgWidth - firstGroupWidth - firstGroupMargin - x;
         } else {
-          return `${x}px`
+          return x
         }
 
       })
@@ -61,13 +62,51 @@ export default function Diagram ({posts}) {
       ))
       .attr('y', ({x}) => {
         if (!isMoveToTop.current) {
-          return `${0}px`
+          return 0
         } else {
-          return `${diagramHeight - x}px`
+          return diagramHeight - x
         }
       })
 
       isMoveToTop.current = !isMoveToTop.current;
+  }
+
+  function rotate () {
+    let step = 1;
+
+    function rotateStep (step) {
+      firstGroup.current
+        .selectAll('rect')
+        .transition()
+        .duration(100)
+        .attr("transform", (a, index, nodes) => {    
+          const centerX = index * (firstGroupWidth + firstGroupMargin) + firstGroupWidth / 2;
+          const centerY = diagramHeight - a.x / 2;
+
+          return `rotate(${step}, ${centerX}, ${centerY})`
+        })
+        .on('end', (a, index) => {
+          if (!index) {
+            step = step + 1;
+          }
+
+          rotateStep(step);
+        });
+    }
+
+    rotateStep(step);
+
+    
+      // .transition()
+      // .attr("transform", (a, index, nodes) => {
+      //   const x = index * (firstGroupWidth + firstGroupMargin);
+  
+      //   const centerX = 0;
+      //   const centerY = diagramHeight - a.x;
+      //   console.log(centerX, centerY);
+
+      //   return `rotate(${index === 0 ? 180 : 0}, ${centerX + firstGroupWidth / 2}, ${centerY})`
+      // })
   }
  
   useEffect(() => {
@@ -75,54 +114,98 @@ export default function Diagram ({posts}) {
       const svg = d3.select(svgRef.current);
 
       svg
-        .style('height', '400px');
+        .style('height', 400)
   
       firstGroup.current = svg.append('g');
       secondGroup.current = svg.append('g');
     }
 
-    const svgWidth = posts.length * firstGroupWidth;
+    const svgWidth = posts.length * (firstGroupWidth + firstGroupMargin);
 
     d3.select(svgRef.current)
-      .style('width', `${svgWidth}px`)
-      .attr('data-width', svgWidth);
+      .style('width', svgWidth)
+      // .attr("viewBox", [0, 0, svgWidth, 400])
+      .attr('data-width', svgWidth)
+      // .call(d3.zoom().on("zoom", function () {
+      //   d3.select(svgRef.current).attr("transform", d3.event.transform)
+      // }));
     
     firstGroup.current
       .selectAll('rect')
       .data(posts, ({id}) => id)
       .enter()
       .append('rect')
-      .attr('width', '20px')
-      .attr('height', ({x}) => (`${x}px`))
+      .attr('width', 20)
+      .attr('height', ({x}) => (x))
       .attr('x', (object, index) => {
-        const x = index * firstGroupWidth;
+        const x = index * (firstGroupWidth + firstGroupMargin);
   
         if (isReverse.current) {
-          return `${svgWidth - firstGroupWidth - x}px`;
+          return svgWidth - firstGroupWidth - firstGroupMargin - x;
         } else {
-          return `${x}px`
+          return x
         }
       })
-      // .attr('y', ({x}) => (`${diagramHeight - x}px`))
       .attr('y', ({x}) => {
         if (isMoveToTop.current) {
-          return `${0}px`
+          return 0
         } else {
-          return `${diagramHeight - x}px`
+          return diagramHeight - x
         }
       })
-      .attr('fill', 'red');
+      .attr('fill', 'red')
+
+    let deltaX, deltaY;
+
+    const zoom = d3.zoom()
+      .duration(2000)
+      .scaleExtent([1, 2]) //число уровней zoom
+      .on("zoom", function (transform) {
+        console.log(transform);
+        // console.log(d3.zoomIdentity);
+        d3.select(this)
+          .attr("transform", d3.event.transform)
+      })
+      // .wheelDelta(() =>  { //размер zoom колеса прокрутки
+      //   return -d3.event.deltaY * (d3.event.deltaMode === 1 ? 0.05 : d3.event.deltaMode ? 1 : 0.002);
+      // })
+
+    firstGroup.current
+      .selectAll('rect')
+      .call(zoom, zoom.transform)
+      // .on("dblclick.zoom", null) //отмена zoom
+      // .on("wheel.zoom", null) //отмена zoom
+      .call(
+        d3.drag()
+          .on("start", function () {
+              const current = d3.select(this);
+
+              deltaX = current.attr("x") - d3.event.x;
+              deltaY = current.attr("y") - d3.event.y;
+          })
+          .on("drag", function () {
+              d3.select(this)
+                  .attr("x", d3.event.x + deltaX)
+                  .attr("y", d3.event.y + deltaY);
+          })
+      )
+      .on('click', (obj, index, nodes) => {
+        // console.log(this);
+        nodes[index].transition()
+          .duration(750)
+          .call(zoom.transform, d3.zoomIdentity);
+      })
 
     firstGroup.current
       .selectAll('rect')
       .data(posts, ({id}) => id)
       .attr('x', (object, index) => {
-        const x = index * firstGroupWidth;
+        const x = index * (firstGroupWidth + firstGroupMargin);
   
         if (isReverse.current) {
-          return `${svgWidth - firstGroupWidth - x}px`;
+          return svgWidth - firstGroupWidth - firstGroupMargin - x;
         } else {
-          return `${x}px`
+          return x
         }
       })
       .exit()
@@ -154,6 +237,7 @@ export default function Diagram ({posts}) {
       <svg ref={svgRef} />
       <button onClick={animationHandler}>animation</button>
       <button onClick={moveToTop}>top / bottom</button>
+      <button onClick={rotate}>rotate</button>
     </div>
   )
 }
