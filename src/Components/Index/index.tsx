@@ -24,8 +24,8 @@ export default function Index () : JSX.Element {
     dispatch(addPostAction({
       name: `Item ${id}`,
       id,
-      x: Math.round(Math.random() * 400),
-      y: Math.round(Math.random() * 400),
+      x: Math.round(Math.random() * 1400),
+      y: Math.round(Math.random() * 1400),
     }))
   }
 

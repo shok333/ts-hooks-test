@@ -211,6 +211,12 @@ export default function Diagram ({posts}) {
       .exit()
       .remove()
 
+    const nodes = svgRef.current.querySelector('rect');
+
+    console.log(nodes.getBoundingClientRect());
+    // firstGroup.current.selectAll('rect').call((a, b, c) => {
+    //   console.log(a, b, c);
+    // });
     // secondGroup.current
     //   .selectAll('rect')
     //   .data(posts, ({id}) => id)
@@ -229,8 +235,6 @@ export default function Diagram ({posts}) {
     //   .exit()
     //   .remove();
   }, [posts]);
-
-
 
   return (
     <div>
