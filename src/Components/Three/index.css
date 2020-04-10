@@ -1,0 +1,9 @@
+.three-container {
+  width: 100%;
+  height: 400px;
+}
+
+.three-container canvas {
+  width: 100%;
+  height: 100%;
+}

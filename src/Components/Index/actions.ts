@@ -2,6 +2,7 @@
 import fetchMock from 'fetch-mock';
 import {Dispatch} from 'redux';
 import {ThunkAction} from 'redux-thunk';
+import { createAction } from 'redux-actions';
 
 fetchMock.get('/items-list', [
   {name: 'item1', id: 1, x: 100, y:50},
@@ -24,7 +25,7 @@ interface Action {
 }
 
 export interface LoadPostsSuccessAction extends Action {
-  posts: Array<Post>
+  payload: Array<Post>
 }
 
 export type Thunk<ReturnedValue> = ThunkAction<ReturnedValue, {}, undefined, LoadPostsSuccessAction>;
@@ -67,6 +68,41 @@ export type Thunk<ReturnedValue> = ThunkAction<ReturnedValue, {}, undefined, Loa
 // 	}
 // );
 
+export class AddPostAction implements ActionTypeType<Post> {
+  readonly type = 'ADD_POST';
+
+  constructor (public payload: Post) {
+
+  }
+}
+
+export class RemovePostAction implements ActionTypeType<string> {
+  readonly type = 'REMOVE_POST';
+
+  constructor (public payload: string) {
+
+  }
+}
+
+export class LoadPostsSuccessAction implements ActionTypeType<Post[]> {
+  readonly type = 'LOAD_ITEMS_SUCCESS';
+
+  constructor (public payload: Post[]) {
+
+  }
+}
+// export interface RemovePostAction {
+//   type: string,
+//   payload: string,
+// }
+
+export interface ActionTypeType<T> {
+  readonly type: string;
+  readonly payload: T;
+}
+
+export type ActionType = RemovePostAction | AddPostAction | LoadPostsSuccessAction;
+
 export function loadPostsAction (): Thunk<void> {
   return (dispatch : Dispatch) : void => {
     dispatch({
@@ -84,33 +120,28 @@ export function loadPostsAction (): Thunk<void> {
   } 
 }
 
-export function loadPostsSuccessAction (posts: Array<Post>): LoadPostsSuccessAction {
+export function loadPostsSuccessAction (payload: Array<Post>): ActionTypeType<Post[]> {
   return {
     type: 'LOAD_ITEMS_SUCCESS',
-    posts,
+    payload,
   }
 }
 
-export interface AddPostAction {
-  type: string,
-  post: Post
-}
-
-export function addPostAction (post: Post) : AddPostAction {
+export function addPostAction (payload: Post) : ActionTypeType<Post> {
   return {
     type: 'ADD_POST',
-    post
+    payload
   }
 }
 
-export interface RemovePostAction {
-  type: string,
-  postId: string,
-}
+// export const addPostAction = createAction('ADD_POST', (post: Post) => ({post}));
 
-export function removePostAction (postId: string) : RemovePostAction {
+// console.log(addPostAction({name: 'item1', id: '1', x: 100, y:50}));
+
+export function removePostAction (payload: string) : ActionTypeType<string> {
   return {
     type: 'REMOVE_POST',
-    postId,
+    payload,
   }
 }
+
