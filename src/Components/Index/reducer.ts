@@ -49,6 +49,11 @@ export function reducer (state : State = getInitialState() , action : ActionType
         draft.posts = draft.posts.filter((post) => (post.id !== action.payload));
 
         break;
+
+      case 'REVERSE_ITEMS':
+        draft.posts.reverse()
+
+        break;
     }
   })
 }

@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
 import { Spin, Row, Col, Button} from 'antd';
 import {useSelector, useDispatch} from 'react-redux';
-import {loadPostsAction, addPostAction, Post, removePostAction} from './actions';
+import {loadPostsAction, addPostAction, Post, removePostAction, reverseItemsAction} from './actions';
 import {Dispatch} from 'redux';
 import shortid from 'shortid';
 import Diagram from './Diagram';
@@ -35,11 +35,16 @@ export default function Index () : JSX.Element {
     }
   }
 
+  function reverseItems () {
+    dispatch(reverseItemsAction());
+  }
+
   return (
     <div>
       <Row>
         <Col span={8}>
           <Button key="add" onClick={addPost}>Добавить элемент</Button>
+          <Button key="reverse" onClick={reverseItems}>Обратный порядок</Button>
           {
             !postsLoader ? (
               <Spin />
